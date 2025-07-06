@@ -1,15 +1,22 @@
 package main
 
 import (
+	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/levon-dalakyan/gator/internal/config"
+	"github.com/levon-dalakyan/gator/internal/database"
+	_ "github.com/lib/pq"
 )
 
 type state struct {
-	config *config.Config
+	db  *database.Queries
+	cfg *config.Config
 }
 
 type command struct {
@@ -44,7 +51,12 @@ func handlerLogin(s *state, cmd command) error {
 		return fmt.Errorf("The username is required")
 	}
 	username := cmd.args[0]
-	err := s.config.SetUser(username)
+	user, err := s.db.GetUser(context.Background(), username)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = s.cfg.SetUser(user.Name)
 	if err != nil {
 		return err
 	}
@@ -54,19 +66,65 @@ func handlerLogin(s *state, cmd command) error {
 	return nil
 }
 
+func handlerRegister(s *state, cmd command) error {
+	if len(cmd.args) == 0 {
+		return fmt.Errorf("The username is required")
+	}
+	username := cmd.args[0]
+	user, err := s.db.CreateUser(context.Background(), database.CreateUserParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Name:      username,
+	})
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = s.cfg.SetUser(user.Name)
+	if err != nil {
+		return err
+	}
+	fmt.Println("The user was created!")
+	fmt.Println(user)
+
+	return nil
+}
+
+func handlerReset(s *state, cmd command) error {
+	err := s.db.DeleteUsers(context.Background())
+	if err != nil {
+		os.Exit(1)
+	} else {
+		os.Exit(0)
+	}
+
+	return nil
+}
+
 func main() {
+	dbURL := "postgres://levondalakan:@localhost:5432/gator?sslmode=disable"
+	db, err := sql.Open("postgres", dbURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	dbQueries := database.New(db)
+
 	cfg, err := config.Read()
 	if err != nil {
 		log.Fatalf("An error occured reading config: %v", err)
 	}
 
 	st := state{
-		config: &cfg,
+		cfg: &cfg,
+		db:  dbQueries,
 	}
 	cmds := commands{
 		handlers: map[string]func(*state, command) error{},
 	}
 	cmds.register("login", handlerLogin)
+	cmds.register("register", handlerRegister)
+	cmds.register("reset", handlerReset)
 
 	args := os.Args
 	if len(args) < 2 {
