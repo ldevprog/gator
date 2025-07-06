@@ -120,17 +120,16 @@ func handlerUsers(s *state, cmd command) error {
 }
 
 func main() {
-	dbURL := "postgres://levondalakan:@localhost:5432/gator?sslmode=disable"
-	db, err := sql.Open("postgres", dbURL)
-	if err != nil {
-		log.Fatal(err)
-	}
-	dbQueries := database.New(db)
-
 	cfg, err := config.Read()
 	if err != nil {
 		log.Fatalf("An error occured reading config: %v", err)
 	}
+
+	db, err := sql.Open("postgres", cfg.DBURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	dbQueries := database.New(db)
 
 	st := state{
 		cfg: &cfg,
