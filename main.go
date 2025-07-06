@@ -102,6 +102,23 @@ func handlerReset(s *state, cmd command) error {
 	return nil
 }
 
+func handlerUsers(s *state, cmd command) error {
+	users, err := s.db.GetUsers(context.Background())
+	if err != nil {
+		return err
+	}
+
+	for _, user := range users {
+		name := fmt.Sprintf("* %s", user.Name)
+		if user.Name == s.cfg.CurrentUserName {
+			name = fmt.Sprintf("%s (current)", name)
+		}
+		fmt.Println(name)
+	}
+
+	return nil
+}
+
 func main() {
 	dbURL := "postgres://levondalakan:@localhost:5432/gator?sslmode=disable"
 	db, err := sql.Open("postgres", dbURL)
@@ -125,6 +142,7 @@ func main() {
 	cmds.register("login", handlerLogin)
 	cmds.register("register", handlerRegister)
 	cmds.register("reset", handlerReset)
+	cmds.register("users", handlerUsers)
 
 	args := os.Args
 	if len(args) < 2 {
