@@ -14,22 +14,22 @@ func HandlerFeeds(s *state.State, cmd state.Command) error {
 	}
 
 	type feedDataOut struct {
-		name              string
-		url               string
-		userAddedFeedName string
+		name        string
+		url         string
+		creatorName string
 	}
 
 	var feedsOut []feedDataOut
 	for _, feed := range feeds {
-		feedUserAddedName, err := s.DB.GetUserNameById(context.Background(), feed.UserID)
+		feedCreatorName, err := s.DB.GetUserNameById(context.Background(), feed.UserID)
 		if err != nil {
 			return err
 		}
 
 		feedsOut = append(feedsOut, feedDataOut{
-			name:              feed.Name,
-			url:               feed.Url,
-			userAddedFeedName: feedUserAddedName,
+			name:        feed.Name,
+			url:         feed.Url,
+			creatorName: feedCreatorName,
 		})
 	}
 
@@ -37,7 +37,7 @@ func HandlerFeeds(s *state.State, cmd state.Command) error {
 		fmt.Println("--Feed--")
 		fmt.Println("\tName:", fo.name)
 		fmt.Println("\tUrl:", fo.url)
-		fmt.Println("\tuserAddedFeedName:", fo.userAddedFeedName)
+		fmt.Println("\tuserAddedFeedName:", fo.creatorName)
 	}
 
 	return nil
