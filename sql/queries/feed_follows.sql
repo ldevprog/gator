@@ -15,8 +15,8 @@ INSERT INTO feed_follows (id, created_at, updated_at, user_id, feed_id)
 
 -- name: GetFeedFollowsForUser :many
 SELECT
-    users.name,
-    feeds.name
+    users.name AS user_name,
+    feeds.name AS feed_name
 FROM
     feed_follows
     INNER JOIN users ON feed_follows.user_id = users.id
