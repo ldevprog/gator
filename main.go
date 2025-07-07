@@ -8,6 +8,7 @@ import (
 	"github.com/levon-dalakyan/gator/internal/commands"
 	"github.com/levon-dalakyan/gator/internal/config"
 	"github.com/levon-dalakyan/gator/internal/database"
+	"github.com/levon-dalakyan/gator/internal/middleware"
 	"github.com/levon-dalakyan/gator/internal/state"
 	_ "github.com/lib/pq"
 )
@@ -36,10 +37,10 @@ func main() {
 	cmds.Register("reset", commands.HandlerReset)
 	cmds.Register("users", commands.HandlerUsers)
 	cmds.Register("agg", commands.HandlerAgg)
-	cmds.Register("addfeed", commands.HandlerAddFeed)
+	cmds.Register("addfeed", middleware.MiddlewareLoggedIn(commands.HandlerAddFeed))
 	cmds.Register("feeds", commands.HandlerFeeds)
-	cmds.Register("follow", commands.HandlerFollow)
-	cmds.Register("following", commands.HandlerFollowing)
+	cmds.Register("follow", middleware.MiddlewareLoggedIn(commands.HandlerFollow))
+	cmds.Register("following", middleware.MiddlewareLoggedIn(commands.HandlerFollowing))
 
 	args := os.Args
 	if len(args) < 2 {
