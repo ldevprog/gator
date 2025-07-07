@@ -36,7 +36,7 @@ func HandlerAddFeed(s *state.State, cmd state.Command) error {
 		UserID:    user.ID,
 	})
 	if err != nil {
-		fmt.Println("Error creating feed")
+		fmt.Println("Error creating feed:", err)
 		os.Exit(1)
 	}
 
@@ -48,7 +48,7 @@ func HandlerAddFeed(s *state.State, cmd state.Command) error {
 		FeedID:    feed.ID,
 	})
 	if err != nil {
-		fmt.Println("Error creating feed_follow")
+		fmt.Println("Error creating feed_follow:", err)
 		os.Exit(1)
 	}
 
