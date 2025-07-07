@@ -10,7 +10,7 @@ import (
 
 func HandlerLogin(s *state.State, cmd state.Command) error {
 	if len(cmd.Args) == 0 {
-		return fmt.Errorf("The username is required")
+		return fmt.Errorf("The username argument is required")
 	}
 	username := cmd.Args[0]
 	user, err := s.DB.GetUser(context.Background(), username)
