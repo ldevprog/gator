@@ -36,6 +36,7 @@ func main() {
 	cmds.Register("reset", commands.HandlerReset)
 	cmds.Register("users", commands.HandlerUsers)
 	cmds.Register("agg", commands.HandlerAgg)
+	cmds.Register("addfeed", commands.HandlerAddFeed)
 
 	args := os.Args
 	if len(args) < 2 {
