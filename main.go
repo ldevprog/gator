@@ -39,6 +39,7 @@ func main() {
 	cmds.Register("addfeed", commands.HandlerAddFeed)
 	cmds.Register("feeds", commands.HandlerFeeds)
 	cmds.Register("follow", commands.HandlerFollow)
+	cmds.Register("following", commands.HandlerFollowing)
 
 	args := os.Args
 	if len(args) < 2 {
