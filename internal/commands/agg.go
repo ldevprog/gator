@@ -2,6 +2,7 @@ package commands
 
 import (
 	"context"
+	"database/sql"
 	"encoding/xml"
 	"fmt"
 	"html"
@@ -9,6 +10,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/google/uuid"
+	"github.com/levon-dalakyan/gator/internal/database"
 	"github.com/levon-dalakyan/gator/internal/state"
 )
 
@@ -60,8 +63,25 @@ func scrapeFeeds(s *state.State) error {
 		return err
 	}
 
+	layout := time.RFC822
 	for _, item := range feed.Channel.Item {
-		fmt.Printf("- %s\n", item.Title)
+		pubDate, err := time.Parse(layout, item.PubDate)
+		if err != nil {
+			fmt.Println("Error parsing time:", err)
+		}
+		s.DB.CreatePost(context.Background(), database.CreatePostParams{
+			ID:          uuid.New(),
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
+			Title:       item.Title,
+			Url:         item.Link,
+			Description: item.Description,
+			PublishedAt: sql.NullTime{Time: pubDate, Valid: err == nil},
+			FeedID:      nextFeedToFetch.ID,
+		})
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 
 	return err
