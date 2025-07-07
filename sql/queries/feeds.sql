@@ -18,3 +18,21 @@ FROM
 WHERE
     url = $1;
 
+-- name: MarkFeedFetched :exec
+UPDATE
+    feeds
+SET
+    updated_at = timezone('utc', now()),
+    last_fetched_at = timezone('utc', now())
+WHERE
+    id = $1;
+
+-- name: GetNextFeedToFetch :one
+SELECT
+    *
+FROM
+    feeds
+ORDER BY
+    last_fetched_at ASC nulls FIRST
+LIMIT 1;
+
